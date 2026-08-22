@@ -1,0 +1,120 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  identifier String?  @unique
+  name       String
+  email      String?
+  phone      String?
+  createdAt  DateTime @default(now())
+  conversations Conversation[]
+}
+
+model Credential {
+  id        String   @id @default(cuid())
+  name      String
+  encrypted String
+  iv        String
+  authTag   String
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  workflows    Workflow[]
+  subscription Subscription?
+  usageMetrics UsageMetric[]
+  auditLogs    AuditLog[]
+}
+
+model Workflow {
+  id            String              @id @default(cuid())
+  userId        String
+  name          String
+  nodes         String   @default("[]")
+  edges         String   @default("[]")
+  createdAt     DateTime            @default(now())
+  user          User                @relation(fields: [userId], references: [id])
+  executions    WorkflowExecution[]
+  conversations Conversation[]
+}
+
+model WorkflowExecution {
+  id         String   @id @default(cuid())
+  workflowId String
+  status     String   // e.g. 'success', 'failed', 'running'
+  createdAt  DateTime @default(now())
+  workflow   Workflow @relation(fields: [workflowId], references: [id])
+}
+
+model Conversation {
+  id                     String    @id @default(cuid())
+  workflowId             String?
+  chatwootConversationId Int?      @unique
+  chatwootAccountId      Int?
+  customerId             String?
+  status                 String    @default("open")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @default(now()) @updatedAt
+  
+  workflow               Workflow? @relation(fields: [workflowId], references: [id])
+  customer               Customer? @relation(fields: [customerId], references: [id])
+  messages               Message[]
+}
+
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  content        String
+  isIncoming     Boolean
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+
+model Subscription {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  plan           String    @default("free") // free, basic, pro
+  status         String    @default("active")
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  currentPeriodEnd DateTime?
+  workflowsEnabled Boolean   @default(true)
+  
+  user           User      @relation(fields: [userId], references: [id])
+}
+
+model UsageMetric {
+  id             String    @id @default(cuid())
+  userId         String
+  month          String    // e.g. "2026-07"
+  executions     Int       @default(0)
+  
+  user           User      @relation(fields: [userId], references: [id])
+  
+  @@unique([userId, month])
+}
+
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+}
