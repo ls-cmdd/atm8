@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Environment files (never commit real secrets)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Runtime / dev artifacts
+*.db
+*.sqlite
+*.sqlite3
+dump.rdb
+mailhog
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Lockfiles for alternate package managers (this repo uses npm)
+bun.lock
+yarn.lock
+pnpm-lock.yaml
