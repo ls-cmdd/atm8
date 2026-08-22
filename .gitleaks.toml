@@ -1,0 +1,23 @@
+title = "gitleaks config"
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+    '''node_modules''',
+    '''dist''',
+    '''\.git'''
+]
+
+[[rules]]
+description = "Stripe Secret Key"
+id = "stripe-secret-key"
+regex = '''(?i)(sk_test|sk_live|rk_test|rk_live)_[a-zA-Z0-9]{24,99}'''
+secretGroup = 1
+entropy = 3.0
+
+[[rules]]
+description = "OpenAI API Key"
+id = "openai-api-key"
+regex = '''(?i)(sk-[a-zA-Z0-9]{48})'''
+secretGroup = 1
+entropy = 3.0
